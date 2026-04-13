@@ -3,6 +3,7 @@ package buildsrc.convention
 plugins {
     id("buildsrc.convention.kotlin.jvm")
     kotlin("plugin.spring")
+    id("org.springframework.boot")
     id("io.spring.dependency-management")
 }
 
@@ -12,13 +13,13 @@ configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtensio
     }
 }
 
-// shared-kernel is a library, not a runnable app
-// so we disable bootJar and enable plain jar
+tasks.named("bootJar") {
+    enabled = false
+}
+
 tasks.named("jar") {
     enabled = true
 }
-
-
 
 dependencies {
     add("implementation", "org.springframework.boot:spring-boot-starter")
