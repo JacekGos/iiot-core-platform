@@ -5,4 +5,3 @@ plugins {
 dependencies {
     implementation(project(":shared-kernel"))
 }
-

@@ -15,4 +15,6 @@ dependencies {
     implementation(libs.kotlinAllOpenPlugin)
     implementation(libs.springBootGradlePlugin)
     implementation(libs.springDependencyManagementPlugin)
+    implementation(libs.ktlintPlugin)
+    implementation(libs.detektPlugin)
 }

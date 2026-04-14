@@ -4,6 +4,7 @@ plugins {
     id("buildsrc.convention.kotlin.jvm")
     kotlin("plugin.spring")
     id("io.spring.dependency-management")
+    id("buildsrc.convention.kotlin.quality")
 }
 
 configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension> {
