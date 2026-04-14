@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>NewLineAtEndOfFile:Application.kt$com.iiot.coreplatform.pipeline.Application.kt</ID>
+    <ID>SpreadOperator:Application.kt$(*args)</ID>
+  </CurrentIssues>
+</SmellBaseline>
