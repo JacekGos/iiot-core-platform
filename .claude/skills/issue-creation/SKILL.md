@@ -1,6 +1,6 @@
 ---
 name: issue-creation
-description: Use when implementing a GitHub issue/story in the iiot-connector, iiot-core-platform, or iiot-core-web repos, when the user describes a bug/idea that should become a GitHub issue, or when creating a new story from scratch (planning.md is no longer the source for new work).
+description: Use when creating a new GitHub issue for the iiot-connector, iiot-core-platform, or iiot-core-web repos — a fresh story from scratch, or turning a user-described bug/idea into an issue (planning.md is no longer the source for new work).
 ---
 
 # IIoT GitHub issue workflow
@@ -34,16 +34,6 @@ When the user wants to add a new story/task — not implementing an existing one
 5. Write a clear title (`<epic>.<n> — <short title>`) and a body with acceptance criteria as a markdown checklist — draft these from what the user described, don't just transcribe their raw words if they were brief; ask a clarifying question if the scope is genuinely unclear.
 6. Create it: `gh issue create --repo JacekGos/iiot-core-platform --milestone "EPIC-<n>" --label "<bug|enhancement>,<repo labels>" --title "..." --body "..."`.
 7. Show the created issue's URL and number back to the user, along with the branch name it maps to (`<epic>-<n>-<slug>`).
-
-## When starting work on an existing issue ("implement #23", "work on the OPC-UA connector issue")
-
-1. Pull the issue: `gh issue view <n> --repo JacekGos/iiot-core-platform`. Its body is the acceptance criteria — treat it as the definition of done.
-2. If the story references a decision whose rationale isn't obvious from the issue (e.g. "why does Config own tag-alias mapping"), check the ADRs in the "Industrial IOT platform" Claude project (architecture.md, adr.md) before guessing — don't re-derive a decision that's already been made.
-3. Implement the change, scoped to the module(s)/repo(s) the issue's repo labels indicate — don't pull in unrelated context.
-4. Run the repo's full check command (`./gradlew check` for the Kotlin repos) — tests, lint, and (in core-platform) ArchUnit boundary tests all need to pass.
-5. Verify each acceptance-criteria checkbox explicitly before considering it done. Call out in your summary which ones are satisfied.
-6. Commit referencing the issue number. Open the PR with `Closes #<n>` in the description (use `Closes JacekGos/iiot-core-platform#<n>` if the PR is in a different repo than the issue) so merging auto-closes it.
-7. If you discover a genuinely separate problem or missing requirement while implementing, don't silently fold it into this issue's scope — create a new issue for it instead (using the numbering flow above) and mention it in your summary.
 
 ## When the user reports a bug or idea in plain language
 
