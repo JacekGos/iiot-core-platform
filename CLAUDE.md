@@ -1,5 +1,9 @@
 # iiot-core-platform
 
+## Approval
+
+Never make ANY change without first stating exactly what you're about to do and waiting for explicit confirmation. This is not limited to GitHub actions — it covers everything: editing or creating a file, running a build/test/lint command, installing a dependency, running any shell command that changes state, git operations (commit, push, branch, checkout), and GitHub actions (issues, milestones, labels, commits, branches, pushes, PRs). This applies even when a skill's steps say to "create", "implement", "commit", or "run" something — describe the action, then wait for a yes before executing it. Read-only actions (viewing a file, listing issues, searching, running tests to check status) don't need approval — only anything that changes state does.
+
 Kotlin + Spring Boot 3 modular monolith. Contains all application logic — pipeline execution, config management, time-series storage, 
 alerting, dashboard delivery, REST API. Structured into isolated modules communicating only through interfaces and Spring Application Events.
 
