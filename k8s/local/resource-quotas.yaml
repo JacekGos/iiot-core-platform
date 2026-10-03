@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: iiot-dev-quota
+  namespace: iiot-dev
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 3Gi
+    limits.cpu: "4"
+    limits.memory: 6Gi
+    pods: "15"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: iiot-dev-defaults
+  namespace: iiot-dev
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+      default:
+        cpu: 500m
+        memory: 512Mi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: iiot-staging-quota
+  namespace: iiot-staging
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+    pods: "10"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: iiot-staging-defaults
+  namespace: iiot-staging
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+      default:
+        cpu: 500m
+        memory: 512Mi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: argocd-quota
+  namespace: argocd
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 1.5Gi
+    limits.cpu: "2"
+    limits.memory: 2.5Gi
+    pods: "15"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: argocd-defaults
+  namespace: argocd
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+      default:
+        cpu: 500m
+        memory: 512Mi
