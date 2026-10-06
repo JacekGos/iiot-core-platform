@@ -1,6 +1,8 @@
 repositories:
   - name: groundhog2k
     url: https://groundhog2k.github.io/helm-charts/
+  - name: redpanda
+    url: https://charts.redpanda.com/
 
 helmDefaults:
   wait: true
@@ -25,3 +27,12 @@ releases:
   - name: mosquitto
     namespace: iiot-dev
     chart: ./charts/mosquitto
+
+  # Redpanda starts more slowly than the other releases, so it gets a longer timeout.
+  - name: redpanda
+    namespace: iiot-dev
+    chart: redpanda/redpanda
+    version: 26.2.4
+    timeout: 600
+    values:
+      - values/redpanda.yaml

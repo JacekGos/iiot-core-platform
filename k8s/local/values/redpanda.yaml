@@ -1,0 +1,30 @@
+# Overrides for the redpanda/redpanda chart - single broker for local K3s development.
+
+statefulset:
+  replicas: 1
+  initContainers:
+    setDataDirOwnership:
+      enabled: true
+
+# No cert-manager needed. TLS is a later exercise.
+tls:
+  enabled: false
+
+# No listener for clients outside the cluster. Applications inside K3s use the internal listener.
+external:
+  enabled: false
+
+resources:
+  cpu:
+    cores: 1
+  memory:
+    container:
+      max: 2Gi
+
+storage:
+  persistentVolume:
+    size: 5Gi
+
+# Kernel tuning needs privileged access and is not available on WSL2/K3s.
+tuning:
+  tune_aio_events: false
