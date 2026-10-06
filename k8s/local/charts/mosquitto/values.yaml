@@ -1,0 +1,13 @@
+image:
+  repository: eclipse-mosquitto
+  tag: "2.0.22"
+
+storage:
+  requestedSize: 256Mi
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 128Mi
