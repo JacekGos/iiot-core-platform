@@ -1,0 +1,50 @@
+# Overrides for the groundhog2k/postgres chart - TimescaleDB for time-series data (iiot_timeseries).
+# Same chart as PostgreSQL, different image. Standard (non-oss) image: continuous aggregates
+# and retention policies are not part of the open-source edition.
+
+image:
+  repository: timescale/timescaledb
+  tag: "2.30.2-pg16"
+
+# Name objects "timescaledb" instead of "timescaledb-postgres"
+# (Service, StatefulSet, ConfigMap, pod: timescaledb-0)
+fullnameOverride: timescaledb
+
+# The chart defaults to the Debian image user (999). The Timescale image is Alpine-based and uses 70.
+# Verify with the pod logs after the first install.
+podSecurityContext:
+  fsGroup: 70
+  supplementalGroups:
+    - 70
+
+securityContext:
+  runAsUser: 70
+  runAsGroup: 70
+
+# Credentials come from the Secret created from k8s/local/.secrets/timescaledb.env
+settings:
+  existingSecret: timescaledb-credentials
+  superuserPassword:
+    secretKey: superuser_password
+
+userDatabase:
+  existingSecret: timescaledb-credentials
+  name:
+    secretKey: database
+  user:
+    secretKey: user
+  password:
+    secretKey: password
+
+# The chart mounts its own scripts over /docker-entrypoint-initdb.d, which hides the
+# Timescale image's init scripts. This one enables the extension on first start,
+# while running as the superuser (iiot stays a normal user).
+customScripts:
+  02-timescaledb-extension.sh: |
+    #!/bin/sh
+    set -e
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" \
+      -c "CREATE EXTENSION IF NOT EXISTS timescaledb;"
+
+storage:
+  requestedSize: 5Gi
