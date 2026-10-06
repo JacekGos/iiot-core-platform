@@ -20,3 +20,8 @@ releases:
     version: 1.6.8
     values:
       - values/timescaledb.yaml
+
+  # Local chart (no version pin - the version lives in charts/mosquitto/Chart.yaml)
+  - name: mosquitto
+    namespace: iiot-dev
+    chart: ./charts/mosquitto
