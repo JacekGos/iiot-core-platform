@@ -66,3 +66,62 @@ SELECT * FROM data_points_hourly LIMIT 5;
 ```
 
 Data persists across container restarts via the `timescaledb_data` Docker volume, and old rows are dropped automatically after 90 days by the configured retention policy.
+
+## Local K8s Development
+
+Infrastructure runs on the local K3s cluster in the `iiot-dev` namespace and is deployed with Helmfile from
+`k8s/local/`:
+
+```bash
+cd k8s/local
+helmfile apply
+```
+
+It is run by hand and is **not** synced by ArgoCD (see ADR-005). Full setup guide (prerequisites, secrets, password
+rotation, reset): <CONFLUENCE LINK>.
+
+| Component   | In-cluster address                                        | Disk  |
+|-------------|-----------------------------------------------------------|-------|
+| PostgreSQL  | `postgres:5432` (database `iiot_config`)                  | 2Gi   |
+| TimescaleDB | `timescaledb:5432` (database `iiot_timeseries`)           | 5Gi   |
+| Mosquitto   | `mosquitto:1883` (MQTT), `mosquitto:9001` (WebSocket)     | 256Mi |
+| Redpanda    | `redpanda:9093` (Kafka), `redpanda-console:8080` (UI)     | 5Gi   |
+
+### Check status
+
+```bash
+kubectl get pods -n iiot-dev       # all Running; redpanda-configuration shows Completed
+kubectl get svc -n iiot-dev
+kubectl get pvc -n iiot-dev
+```
+
+### Connect from your machine
+
+Services are cluster-internal. Use port-forwarding and stop it with Ctrl+C. Pick other local ports if the Docker
+Compose stack is running, since it uses the same ones.
+
+```bash
+kubectl port-forward -n iiot-dev svc/postgres 5432:5432
+kubectl port-forward -n iiot-dev svc/timescaledb 5433:5432
+kubectl port-forward -n iiot-dev svc/redpanda-console 8080:8080    # http://localhost:8080
+```
+
+```bash
+psql -h localhost -p 5432 -U iiot -d iiot_config
+psql -h localhost -p 5433 -U iiot -d iiot_timeseries
+```
+
+The Redpanda Kafka API is not exposed outside the cluster.
+
+### Quick checks
+
+```bash
+# Mosquitto: publish and receive one message
+kubectl exec -n iiot-dev mosquitto-0 -- sh -c 'mosquitto_sub -t test/hello -C 1 -W 5 & sleep 1; mosquitto_pub -t test/hello -m "hello"; wait'
+
+# TimescaleDB: the timescaledb extension should be listed
+kubectl exec -n iiot-dev timescaledb-0 -- psql -U iiot -d iiot_timeseries -c "\dx"
+
+# Redpanda: broker health
+kubectl exec -n iiot-dev redpanda-0 -c redpanda -- rpk cluster health
+```
