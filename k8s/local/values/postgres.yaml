@@ -1,0 +1,34 @@
+# Overrides for the groundhog2k/postgres chart - PostgreSQL for configuration data (iiot_config).
+# Same image as the Docker Compose stack (postgres:16-alpine).
+
+image:
+  repository: postgres
+  tag: "16-alpine"
+
+# The chart defaults to the Debian image user (999). Alpine images use 70.
+podSecurityContext:
+  fsGroup: 70
+  supplementalGroups:
+    - 70
+
+securityContext:
+  runAsUser: 70
+  runAsGroup: 70
+
+# Credentials come from the Secret created from k8s/local/.secrets/postgres.env
+settings:
+  existingSecret: postgres-credentials
+  superuserPassword:
+    secretKey: superuser_password
+
+userDatabase:
+  existingSecret: postgres-credentials
+  name:
+    secretKey: database
+  user:
+    secretKey: user
+  password:
+    secretKey: password
+
+storage:
+  requestedSize: 2Gi

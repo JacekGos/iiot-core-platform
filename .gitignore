@@ -40,3 +40,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Local K8s secrets (never commit) ###
+k8s/local/.secrets/*.env
