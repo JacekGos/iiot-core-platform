@@ -1,0 +1,89 @@
+# Local single-node K3s. Not a production configuration:
+#  - the API server runs with TLS termination disabled, since it is only reached over port-forward
+#  - Dex and notifications are off - nothing in the MVP uses them. The ApplicationSet
+#    controller has no enabled toggle in this chart, so it is scaled to zero instead;
+#    raise it if staging ever needs generated Applications
+#
+# Every container declares its own resources on purpose. The LimitRange in
+# k8s/local/resource-quotas.yaml injects limits of 500m CPU / 512Mi into any container that
+# does not, and the argocd ResourceQuota caps the namespace at 2 CPU / 2.5Gi of declared
+# limits - so a single container left on the defaults eats a quarter of the CPU budget.
+# That includes the redis-secret-init Job, which runs as a pre-upgrade hook before anything
+# else is touched: with no headroom its pod is refused and the upgrade hangs on it.
+#
+# Declared CPU limits: 400 + 250 + 400 + 150 + 200 + 100 = 1500m of 2000m.
+# ApplicationSet is budgeted but runs no pods at replicas 0.
+
+global:
+  domain: localhost
+
+configs:
+  params:
+    server.insecure: true
+
+dex:
+  enabled: false
+
+notifications:
+  enabled: false
+
+applicationSet:
+  replicas: 0
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# Pre-upgrade hook. Runs before the main workloads are reconciled, so it needs quota headroom.
+redisSecretInit:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+
+controller:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 150m
+      memory: 256Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
+
+server:
+  replicas: 1
+  service:
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+repoServer:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 192Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
+
+redis:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 150m
+      memory: 128Mi

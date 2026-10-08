@@ -125,3 +125,41 @@ kubectl exec -n iiot-dev timescaledb-0 -- psql -U iiot -d iiot_timeseries -c "\d
 # Redpanda: broker health
 kubectl exec -n iiot-dev redpanda-0 -c redpanda -- rpk cluster health
 ```
+
+### ArgoCD
+
+ArgoCD deploys the services from Git. It lives in its own `argocd` namespace with its own Helmfile, deliberately
+separate from the infra above — resetting `iiot-dev` should not take out the thing that puts it back.
+
+#### First install
+
+Run once per cluster — and again only if you rebuild the cluster from scratch.
+
+```bash
+cd k8s/argocd
+helmfile apply
+```
+
+The chart generates a random admin password into a bootstrap secret. Read it, change it, then drop the secret so the
+plaintext copy stops sitting in the cluster:
+
+#### Accessing the UI
+
+The server runs with TLS termination disabled (`server.insecure`), so it is reached over plain HTTP through a
+port-forward. Port 8081 keeps it clear of the Redpanda Console on 8080.
+
+```bash
+kubectl port-forward -n argocd svc/argocd-server 8081:80    # http://localhost:8081
+```
+
+Log in as `admin` with the password you set during install.
+
+#### Manual sync
+
+Once Applications exist, sync from the UI (**Sync** on the Application) or from the CLI against the same
+port-forward:
+
+```bash
+argocd login localhost:8081 --insecure
+argocd app sync core-platform
+```
