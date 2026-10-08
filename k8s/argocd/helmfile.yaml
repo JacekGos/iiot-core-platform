@@ -1,0 +1,16 @@
+repositories:
+  - name: argo
+    url: https://argoproj.github.io/argo-helm/
+
+helmDefaults:
+  wait: true
+  # ArgoCD brings up four workloads and waits on CRDs, so it needs longer than the infra releases.
+  timeout: 600
+
+releases:
+  - name: argocd
+    namespace: argocd
+    chart: argo/argo-cd
+    version: 10.9.7
+    values:
+      - values/argocd.yaml
