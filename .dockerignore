@@ -1,0 +1,14 @@
+.git
+.gradle
+**/build
+**/.gradle
+.idea
+*.iml
+.kotlin
+.claude
+.github
+k8s
+docker
+Claude outputs
+**/.env
+*.md
