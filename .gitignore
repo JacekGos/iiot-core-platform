@@ -43,3 +43,6 @@ bin/
 
 ### Local K8s secrets (never commit) ###
 k8s/local/.secrets/*.env
+
+### Local env files (never commit) ###
+**/.env
