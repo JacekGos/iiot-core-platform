@@ -55,7 +55,7 @@ All services run on an isolated Docker network `iiot-net` and communicate with e
 The stack is configured via a `.env` file. Before starting for the first time:
 
 ```bash
-cp docker/.env.example.example docker/.env.example
+cp docker/.env.example docker/.env
 ```
 
 Then open `docker/.env` and set values. The defaults in `.env.example` are safe for local development.
