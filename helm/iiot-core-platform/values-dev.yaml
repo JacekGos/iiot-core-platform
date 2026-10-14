@@ -1,0 +1,5 @@
+image:
+  pullPolicy: Always
+probes:
+  liveness:  { initialDelaySeconds: 90, failureThreshold: 5 }
+  readiness: { initialDelaySeconds: 45 }

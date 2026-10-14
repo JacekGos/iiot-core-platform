@@ -1,0 +1,51 @@
+image:
+  repository: ghcr.io/jacekgos/core-platform
+  tag: latest            # CI pushes :<sha> and :latest; ArgoCD/CD overrides with sha
+  pullPolicy: IfNotPresent
+imagePullSecrets: []     # e.g. [{name: ghcr-pull}] if the GHCR package is private
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8081
+
+containerPort: 8081      # must match server.port in application.yaml
+
+resources:
+  requests: { cpu: 500m, memory: 512Mi }
+  limits:   { cpu: "1",  memory: 1Gi }
+
+# DB credentials -> existing Secrets created from k8s/local/.secrets/*.env
+database:
+  postgres:
+    existingSecret: postgres-credentials
+    userKey: user
+    passwordKey: password
+  timescaledb:
+    existingSecret: timescaledb-credentials
+    userKey: user
+    passwordKey: password
+
+# Non-secret env -> ConfigMap
+config:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres.iiot-dev.svc.cluster.local:5432/iiot_config
+  SPRING_TIMESCALE_DATASOURCE_URL: jdbc:postgresql://timescaledb.iiot-dev.svc.cluster.local:5432/iiot_timeseries
+  MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: "true"
+
+# Extra secret env (e.g. JWT signing key later). If existingSecret is set, the chart's Secret is not rendered.
+secret:
+  existingSecret: ""
+  data: {}
+
+probes:
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 45
+    periodSeconds: 10
+    failureThreshold: 3
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 3
