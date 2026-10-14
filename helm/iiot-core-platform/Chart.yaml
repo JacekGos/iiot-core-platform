@@ -1,0 +1,6 @@
+apiVersion: v2
+name: iiot-core-platform
+description: IIoT Core Platform - pipeline engine, config, storage, REST API
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
