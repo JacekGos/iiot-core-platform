@@ -1,3 +1,9 @@
+# Manual deploy: records the chosen image SHA in helm/<chart>/values-dev.yaml on main.
+# ArgoCD watches main and rolls out the new tag. Rollback = run again with an older SHA.
+# The push to main uses the DEPLOY_TOKEN secret (fine-grained PAT, Contents: read/write),
+# because main is protected and only a repository admin can bypass the ruleset.
+# If this workflow fails with a permission error, the PAT has probably expired:
+# renew it and update the DEPLOY_TOKEN secret in the repo.
 name: Deploy
 
 on:
@@ -26,6 +32,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ secrets.DEPLOY_TOKEN }}
 
       - name: Resolve SHA
         id: resolve
@@ -59,7 +66,9 @@ jobs:
           fi
 
       - name: Update image tag in values-dev.yaml
-        run: yq -i '.image.tag = "${{ steps.resolve.outputs.sha }}"' "$VALUES_FILE"
+        run: |
+          sed -i '/^image:/,/^[^ ]/ s|^  tag:.*|  tag: ${{ steps.resolve.outputs.sha }}|' "$VALUES_FILE"
+          grep -q "^  tag: ${{ steps.resolve.outputs.sha }}$" "$VALUES_FILE"
 
       - name: Commit and push
         run: |
