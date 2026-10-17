@@ -1,5 +1,5 @@
 image:
-  tag: 8ef0c170b3c1dcaf2e5d0511fa875f092af9de24
+  tag: 1a44716cd51bd7a096055f66b345c1c55c5238ba
   pullPolicy: Always
 probes:
   liveness:  { initialDelaySeconds: 90, failureThreshold: 5 }
