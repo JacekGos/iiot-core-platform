@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: iiot-core-platform
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/JacekGos/iiot-core-platform.git
+    targetRevision: main
+    path: helm/iiot-core-platform
+    helm:
+      valueFiles:
+        - values-dev.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: iiot-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
