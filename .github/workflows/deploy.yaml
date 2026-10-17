@@ -1,0 +1,74 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Commit SHA to deploy (empty = latest main commit that is not a chore(deploy) commit)"
+        required: false
+        default: ""
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+    env:
+      IMAGE: ghcr.io/jacekgos/core-platform
+      VALUES_FILE: helm/iiot-core-platform/values-dev.yaml
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Resolve SHA
+        id: resolve
+        run: |
+          INPUT_SHA="${{ inputs.sha }}"
+          if [ -n "$INPUT_SHA" ]; then
+            SHA=$(git rev-parse --verify "${INPUT_SHA}^{commit}")
+          else
+            SHA=$(git log main --format='%H %s' | grep -v ' chore(deploy):' | head -n1 | cut -d' ' -f1)
+          fi
+          if [ -z "$SHA" ]; then
+            echo "::error::Could not resolve a commit to deploy"
+            exit 1
+          fi
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "short=${SHA:0:7}" >> "$GITHUB_OUTPUT"
+          echo "Deploying $SHA"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify image exists in GHCR
+        run: |
+          if ! docker manifest inspect "$IMAGE:${{ steps.resolve.outputs.sha }}" > /dev/null; then
+            echo "::error::Image $IMAGE:${{ steps.resolve.outputs.sha }} not found in GHCR"
+            exit 1
+          fi
+
+      - name: Update image tag in values-dev.yaml
+        run: yq -i '.image.tag = "${{ steps.resolve.outputs.sha }}"' "$VALUES_FILE"
+
+      - name: Commit and push
+        run: |
+          if git diff --quiet; then
+            echo "image.tag already set to ${{ steps.resolve.outputs.short }}, nothing to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$VALUES_FILE"
+          git commit -m "chore(deploy): ${{ steps.resolve.outputs.short }} [skip ci]"
+          git push origin main
