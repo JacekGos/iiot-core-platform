@@ -1,4 +1,5 @@
 image:
+  tag: latest # overwritten by the Deploy workflow (.github/workflows/deploy.yaml)
   pullPolicy: Always
 probes:
   liveness:  { initialDelaySeconds: 90, failureThreshold: 5 }
